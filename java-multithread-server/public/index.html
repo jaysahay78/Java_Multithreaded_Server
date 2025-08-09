@@ -1,0 +1,58 @@
+<!doctype html>
+<html lang="en">
+<head>
+  <meta charset="utf-8"/>
+  <meta name="viewport" content="width=device-width, initial-scale=1"/>
+  <title>WebSocket Chat</title>
+  <link rel="stylesheet" href="./app.css">
+</head>
+<body>
+  <main class="wrap">
+    <header class="topbar">
+      <h1>WebSocket Chat</h1>
+      <div class="status">
+        <span id="wsStatus" class="pill warn">WS: disconnected</span>
+        <span id="me" class="pill">Not logged in</span>
+      </div>
+    </header>
+
+    <section class="panel login" id="loginPanel">
+      <h2>Login</h2>
+      <div class="row">
+        <input id="username" placeholder="Enter a username (e.g., alice)" autocomplete="off">
+        <button id="loginBtn">Login</button>
+      </div>
+      <p class="hint">Tip: Open this page in two tabs, login as different users, then try PM/Broadcast.</p>
+    </section>
+
+    <section class="grid">
+      <div class="panel">
+        <h3>Users <button class="small" id="refreshUsers">↻</button></h3>
+        <select id="userList" size="8" class="listbox"></select>
+        <div class="muted" id="userCount"></div>
+      </div>
+
+      <div class="panel">
+        <h3>Private Message</h3>
+        <div class="row">
+          <select id="pmTo"></select>
+          <input id="pmText" placeholder="Type a private message">
+          <button id="pmSend">Send PM</button>
+        </div>
+        <h3 style="margin-top:1rem">Broadcast</h3>
+        <div class="row">
+          <input id="bcText" placeholder="Type a broadcast message">
+          <button id="bcSend">Broadcast</button>
+        </div>
+      </div>
+    </section>
+
+    <section class="panel">
+      <h3>Messages</h3>
+      <pre id="log"></pre>
+    </section>
+  </main>
+
+  <script src="./chat.js"></script>
+</body>
+</html>

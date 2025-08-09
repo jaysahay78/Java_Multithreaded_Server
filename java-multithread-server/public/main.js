@@ -1,0 +1,1 @@
+// replaced by chat.js; kept for backward-compat\n
