@@ -24,35 +24,46 @@ Open:
 * **TCP server (custom protocol)**: `localhost:8081`
 
 ---
-
+```
 ## Architecture overview
 
-```
-+--------------------+        +------------------------------+
-|  TCP Server :8081  |        |  Jetty :8080                 |
-|  ThreadPoolExecutor|        |  - Serves /  → ./public      |
-|  Commands:         |        |  - WS /chat/{username}       |
-|  LOGIN, MSG,       |        |  - SPA (index.html + JS)     |
-|  BROADCAST,        |        +------------------------------+
-|  GETFILE, USERS    |
-+--------------------+                     ^
-            ^                              |
-            |                              |
-            v                              |
-+--------------------+        +------------------------------+
-| ClientRegistry     |  <---- | WS users (via WsSessionBridge)|
-| - Tracks TCP & WS  |        +------------------------------+
-| - broadcast/PM     |
-| - usernames()      |
-+--------------------+        +------------------------------+
-                               | Dashboard :9000              |
-                               | - /          (HTML summary) |
-                               | - /metrics   (JSON + CORS)  |
-                               | - /files     (static from   |
-                               |               ./public)     |
-                               +------------------------------+
-```
++---------------------------+             +-----------------------------+
+|        TCP Server         |             |            Jetty            |
+|           :8081           |             |             :8080           |
+|---------------------------|             |-----------------------------|
+| - ThreadPoolExecutor      |             | - Serves ./public at "/"    |
+| - Line protocol:          |             | - WebSocket /chat/{user}    |
+|   LOGIN, MSG, BROADCAST,  |             | - SPA (index.html + JS)     |
+|   GETFILE, USERS, QUIT    |             +-----------------------------+
++-------------+-------------+                           |
+              |                                         |
+              | (register users, PM/broadcast)          | (register users, PM/broadcast)
+              v                                         v
++---------------------------------------------------------------------+
+|                          ClientRegistry                             |
+|---------------------------------------------------------------------|
+| - Tracks TCP clients (username → PrintWriter)                       |
+| - Tracks WS clients  (username → WsSessionBridge)                   |
+| - usernames(), broadcast(msg), sendToUser(user,msg), activeCount()  |
++----------------------+-------------------------------+--------------+
+                       |                               |
+                       | reads from ./public           | reads from ./public
+                       v                               v
+      +-----------------------------+       +-----------------------------+
+      |     Dashboard HTTP Server   |       |          Jetty (8080)       |
+      |            :9000            |       |             "/"             |
+      |-----------------------------|       |  Static file server         |
+      | - "/"  HTML overview        |       |  (DefaultServlet)           |
+      | - "/metrics" JSON (+CORS)   |       +-----------------------------+
+      | - "/files" static from      |
+      |    ./public (mime, cache)   |
+      +-----------------------------+
 
+Flows:
+- UI (http://localhost:8080/) ⇄ WS (ws://localhost:8080/chat/{username})
+- UI fetches metrics from http://localhost:9000/metrics (CORS enabled)
+- TCP clients connect to localhost:8081 and use the text commands
+```
 ---
 
 ## Modules & key classes
